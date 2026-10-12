@@ -29,7 +29,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   }
 
   // Storyline & lore narrative
-  fastify.get('/api/storyline', async (req, reply) => {
+  fastify.get('/api/storyline', { config: { rateLimit: { max: 100, timeWindow: '1 minute' } } }, async (req, reply) => {
     return {
       success: true,
       storyline: STORYLINE,
@@ -37,7 +37,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Billing status
-  fastify.get('/api/billing/status', async (req, reply) => {
+  fastify.get('/api/billing/status', { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) {
       return {
@@ -71,7 +71,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Start 14-day trial
-  fastify.post('/api/billing/start-trial', async (req, reply) => {
+  fastify.post('/api/billing/start-trial', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) return reply.code(401).send({ error: 'Unauthorized' })
     if (user.trialStartedAt) {
@@ -87,7 +87,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Upgrade to paid plan
-  fastify.post('/api/billing/upgrade', async (req, reply) => {
+  fastify.post('/api/billing/upgrade', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) return reply.code(401).send({ error: 'Unauthorized' })
     const planName = req.body?.plan || 'architect_pro'
@@ -101,7 +101,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Payment webhook endpoint
-  fastify.post('/api/billing/webhook', async (req, reply) => {
+  fastify.post('/api/billing/webhook', { config: { rateLimit: { max: 100, timeWindow: '1 minute' } } }, async (req, reply) => {
     const event = req.body || {}
     const { type, data } = event
     if (data?.object?.userId) {
@@ -119,7 +119,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Progression status
-  fastify.get('/api/progression', async (req, reply) => {
+  fastify.get('/api/progression', { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) {
       return {
@@ -140,7 +140,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Claim mission
-  fastify.post('/api/progression/claim', async (req, reply) => {
+  fastify.post('/api/progression/claim', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) return reply.code(401).send({ error: 'Unauthorized' })
     const { missionId } = req.body || {}
@@ -209,7 +209,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
   })
 
   // Equip cosmetic
-  fastify.post('/api/progression/equip', async (req, reply) => {
+  fastify.post('/api/progression/equip', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
     const user = await getUser(req)
     if (!user) return reply.code(401).send({ error: 'Unauthorized' })
     const { cosmeticId } = req.body || {}

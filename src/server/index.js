@@ -10,6 +10,7 @@ import cors from '@fastify/cors'
 import compress from '@fastify/compress'
 import statics from '@fastify/static'
 import multipart from '@fastify/multipart'
+import rateLimit from '@fastify/rate-limit'
 
 import { createServerWorld } from '../core/createServerWorld'
 import { getDB } from './db'
@@ -94,6 +95,10 @@ await world.init({
 
 fastify.register(cors)
 fastify.register(compress)
+await fastify.register(rateLimit, {
+  max: 120,
+  timeWindow: '1 minute',
+})
 fastify.get('/', async (req, reply) => {
   const title = world.settings.title || 'World'
   const desc = world.settings.desc || ''
