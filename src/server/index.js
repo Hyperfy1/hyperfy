@@ -17,6 +17,7 @@ import { Storage } from './Storage'
 import { assets } from './assets'
 import { collections } from './collections'
 import { cleaner } from './cleaner'
+import { registerMonetizationRoutes } from './routes'
 
 const rootDir = path.join(__dirname, '../')
 const worldDir = path.join(rootDir, process.env.WORLD)
@@ -135,6 +136,8 @@ fastify.register(multipart, {
 })
 fastify.register(ws)
 fastify.register(worldNetwork)
+
+await registerMonetizationRoutes(fastify, { db, world })
 
 const publicEnvs = {}
 for (const key in process.env) {
