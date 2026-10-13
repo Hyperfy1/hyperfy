@@ -1,3 +1,5 @@
+/* global app, world, Vector3 */
+
 // Non-graphic melee sparring arena. Attach this script to an app in a world.
 
 const ARENA_SIZE = 24
