@@ -11,6 +11,7 @@ import {
   getProgressionStatus,
   calculateTier,
   MISSIONS,
+  normalizeMissionProgress,
   COSMETIC_ITEMS,
   STORYLINE,
 } from '../core/progression'
@@ -156,6 +157,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
     } catch {
       missionProgress = {}
     }
+    missionProgress = normalizeMissionProgress(missionProgress)
 
     const currentProg = missionProgress[missionId] || { progress: 0, completed: false, claimed: false }
     if (currentProg.claimed) {
@@ -166,6 +168,7 @@ export async function registerMonetizationRoutes(fastify, { db, world }) {
       progress: Math.max(currentProg.progress, mission.target),
       completed: true,
       claimed: true,
+      cycle: currentProg.cycle,
       claimedAt: new Date().toISOString(),
     }
 

@@ -19,6 +19,7 @@ import {
   getProgressionStatus,
   calculateTier,
   MISSIONS,
+  normalizeMissionProgress,
   COSMETIC_ITEMS,
   formatHighIntensityEvent,
   STORYLINE,
@@ -703,6 +704,7 @@ export class ServerNetwork extends System {
     } catch {
       missionProgress = {}
     }
+    missionProgress = normalizeMissionProgress(missionProgress)
 
     const currentProg = missionProgress[missionId] || { progress: 0, completed: false, claimed: false }
     if (currentProg.claimed) return // already claimed
@@ -712,6 +714,7 @@ export class ServerNetwork extends System {
       progress: Math.max(currentProg.progress, mission.target),
       completed: true,
       claimed: true,
+      cycle: currentProg.cycle,
       claimedAt: moment().toISOString(),
     }
 

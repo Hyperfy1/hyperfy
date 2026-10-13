@@ -236,6 +236,36 @@ export const MISSIONS = [
   },
 ]
 
+function getMissionCycle(mission, now) {
+  if (mission.type !== 'daily' && mission.type !== 'weekly') return null
+
+  const date = new Date(now)
+  const cycleStart = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate() - (mission.type === 'weekly' ? (date.getUTCDay() + 6) % 7 : 0)
+  )
+  return new Date(cycleStart).toISOString().slice(0, 10)
+}
+
+export function normalizeMissionProgress(missionProgress = {}, now = new Date()) {
+  const normalized = { ...missionProgress }
+
+  for (const mission of MISSIONS) {
+    const cycle = getMissionCycle(mission, now)
+    if (!cycle) continue
+
+    const existing = normalized[mission.id]
+    if (!existing || typeof existing !== 'object' || (existing.cycle && existing.cycle !== cycle)) {
+      normalized[mission.id] = { progress: 0, completed: false, claimed: false, cycle }
+    } else {
+      normalized[mission.id] = { ...existing, cycle }
+    }
+  }
+
+  return normalized
+}
+
 /**
  * Calculates current tier based on total XP
  */
@@ -272,7 +302,7 @@ export function calculateTier(xp = 0) {
 /**
  * Formats full progression status for serialization
  */
-export function getProgressionStatus(user = {}) {
+export function getProgressionStatus(user = {}, now = new Date()) {
   const xp = user.xp || 0
   const tierInfo = calculateTier(xp)
 
@@ -302,6 +332,7 @@ export function getProgressionStatus(user = {}) {
       missionProgress = {}
     }
   }
+  missionProgress = normalizeMissionProgress(missionProgress, now)
 
   // Map missions with user completion state
   const activeMissions = MISSIONS.map(mission => {
@@ -330,13 +361,13 @@ export function getProgressionStatus(user = {}) {
 /**
  * Claims a mission reward and returns the updated progression state
  */
-export function claimMissionReward(progression = {}, missionId) {
+export function claimMissionReward(progression = {}, missionId, now = new Date()) {
   const mission = MISSIONS.find(m => m.id === missionId)
   if (!mission) {
     return { success: false, reason: 'Mission not found' }
   }
 
-  const currentMissionProgress = { ...(progression.missionProgress || {}) }
+  const currentMissionProgress = normalizeMissionProgress(progression.missionProgress || {}, now)
   const existing = currentMissionProgress[missionId]
   if (existing?.claimed) {
     return { success: false, reason: 'Mission already claimed' }
@@ -362,6 +393,7 @@ export function claimMissionReward(progression = {}, missionId) {
     progress: mission.target,
     completed: true,
     claimed: true,
+    cycle: existing.cycle,
   }
 
   return {

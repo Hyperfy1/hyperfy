@@ -14,7 +14,9 @@ import {
 import {
   calculateTier,
   claimMissionReward,
+  getProgressionStatus,
   MISSIONS,
+  normalizeMissionProgress,
   COSMETIC_ITEMS,
   STORYLINE,
   TIER_THRESHOLDS,
@@ -135,6 +137,44 @@ test('Progression Missions & Family-Safe Grinding', () => {
   const resultWeekly = claimMissionReward(result1.progression, 'weekly_overdrive')
   assert.ok(resultWeekly.success)
   assert.ok(resultWeekly.progression.unlockedCosmetics.includes('badge_overdrive'))
+})
+
+test('Daily and weekly missions reset on UTC cycle rollover', () => {
+  const missionProgress = {
+    daily_explore: { progress: 1, completed: true, claimed: true, cycle: '2026-10-12' },
+    weekly_overdrive: { progress: 5, completed: true, claimed: true, cycle: '2026-10-05' },
+  }
+  const now = new Date('2026-10-13T00:00:00Z')
+  const normalized = normalizeMissionProgress(missionProgress, now)
+
+  assert.deepEqual(normalized.daily_explore, {
+    progress: 0,
+    completed: false,
+    claimed: false,
+    cycle: '2026-10-13',
+  })
+  assert.deepEqual(normalized.weekly_overdrive, {
+    progress: 0,
+    completed: false,
+    claimed: false,
+    cycle: '2026-10-12',
+  })
+  const status = getProgressionStatus({ missionProgress }, now)
+  assert.equal(status.missions.find(mission => mission.id === 'daily_explore').claimed, false)
+  assert.equal(status.missions.find(mission => mission.id === 'weekly_overdrive').claimed, false)
+
+  const firstClaim = claimMissionReward({ missionProgress }, 'daily_explore', now)
+  assert.equal(firstClaim.success, true)
+  assert.equal(firstClaim.progression.missionProgress.daily_explore.cycle, '2026-10-13')
+  assert.equal(claimMissionReward(firstClaim.progression, 'daily_explore', now).success, false)
+  assert.equal(
+    claimMissionReward(firstClaim.progression, 'daily_explore', new Date('2026-10-14T00:00:00Z')).success,
+    true
+  )
+  assert.equal(
+    claimMissionReward({ missionProgress }, 'weekly_overdrive', new Date('2026-10-19T00:00:00Z')).success,
+    true
+  )
 })
 
 test('Cosmetics & Badges System', () => {
