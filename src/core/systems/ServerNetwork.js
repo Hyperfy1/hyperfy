@@ -706,10 +706,11 @@ export class ServerNetwork extends System {
 
     const currentProg = missionProgress[missionId] || { progress: 0, completed: false, claimed: false }
     if (currentProg.claimed) return // already claimed
+    if (!(currentProg.progress >= mission.target)) return
 
-    // Mark completed and claimed
+    // Mark the completed mission as claimed
     missionProgress[missionId] = {
-      progress: Math.max(currentProg.progress, mission.target),
+      ...currentProg,
       completed: true,
       claimed: true,
       claimedAt: moment().toISOString(),
