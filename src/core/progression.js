@@ -119,6 +119,8 @@ export const COSMETIC_ITEMS = [
   },
 ]
 
+export const canEquipCosmetic = item => item?.type === 'skin' && Boolean(item.avatarUrl)
+
 export const PROGRESSION_TIERS = [
   {
     tier: 1,

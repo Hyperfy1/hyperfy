@@ -13,7 +13,7 @@ import {
   CompassIcon,
   ExternalLinkIcon,
 } from 'lucide-react'
-import { COSMETIC_ITEMS, MISSIONS, STORYLINE, calculateTier } from '../../core/progression'
+import { COSMETIC_ITEMS, MISSIONS, STORYLINE, calculateTier, canEquipCosmetic } from '../../core/progression'
 
 export function MissionsPane({ world, hidden, onOpenUpgrade }) {
   const [activeTab, setActiveTab] = useState('missions') // 'missions' | 'storyline'
@@ -392,7 +392,7 @@ export function MissionsPane({ world, hidden, onOpenUpgrade }) {
                       >
                         {item.desc}
                       </div>
-                      {isUnlocked && (
+                      {isUnlocked && canEquipCosmetic(item) && (
                         <button
                           onClick={() => handleEquip(item.id)}
                           css={css`

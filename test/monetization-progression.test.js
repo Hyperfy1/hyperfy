@@ -16,6 +16,7 @@ import {
   claimMissionReward,
   MISSIONS,
   COSMETIC_ITEMS,
+  canEquipCosmetic,
   STORYLINE,
   TIER_THRESHOLDS,
 } from '../src/core/progression.js'
@@ -146,6 +147,10 @@ test('Cosmetics & Badges System', () => {
     assert.ok(item.rarity)
     assert.ok(item.color)
   }
+  assert.deepEqual(
+    COSMETIC_ITEMS.filter(canEquipCosmetic).map(item => item.type),
+    ['skin', 'skin', 'skin']
+  )
 })
 
 test('Storyline Introduction & Lore Narrative', () => {

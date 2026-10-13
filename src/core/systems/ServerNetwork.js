@@ -20,6 +20,7 @@ import {
   calculateTier,
   MISSIONS,
   COSMETIC_ITEMS,
+  canEquipCosmetic,
   formatHighIntensityEvent,
   STORYLINE,
 } from '../progression'
@@ -778,7 +779,7 @@ export class ServerNetwork extends System {
     const user = socket.user
     if (!user) return
     const item = COSMETIC_ITEMS.find(c => c.id === cosmeticId)
-    if (!item) return
+    if (!item || !canEquipCosmetic(item)) return
 
     let unlocked = []
     try {
